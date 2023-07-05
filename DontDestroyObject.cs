@@ -10,15 +10,4 @@ public class DontDestroyObject : MonoBehaviour
     {
         DontDestroyOnLoad(this);
     }
-
-    private void Start()
-    {
-        foreach (var format in System.Enum.GetValues(typeof(RenderTextureFormat)))
-        {
-            if (SystemInfo.SupportsRenderTextureFormat((RenderTextureFormat)format))
-            {
-                Debug.Log("Supported RenderTextureFormat: " + format.ToString());
-            }
-        }
-    }
 }
