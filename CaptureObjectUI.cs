@@ -70,7 +70,7 @@ public class CaptureObjectUI : MonoBehaviour
         long milliseconds = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
         string filename = milliseconds + ".png";
         string filePath = Path.Combine(folderPath, filename);
-        Debug.Log("Hello///" + filePath);
+        Debug.Log("Path Capture : " + filePath);
         return filePath;
     }
 
