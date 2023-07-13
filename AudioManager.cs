@@ -3,11 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AudioManager1 : MonoBehaviour
+public class AudioManager : MonoBehaviour
 {
     
-    private static AudioManager1 ins;
-    public static AudioManager1 Ins
+    private static AudioManager ins;
+    public static AudioManager Ins
     {
         get => ins;
     }
