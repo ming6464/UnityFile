@@ -94,4 +94,29 @@ public class CaptureObjectUI : MonoBehaviour
         // Lưu ảnh vào đường dẫn đã chỉ định
         System.IO.File.WriteAllBytes(GetPath(), bytes);
     }
+
+    //Thêm ảnh vào media để hiển thị trên các ứng dụng album của điện thoại
+    public void AddToMedia(string filePath)
+    {
+        using (AndroidJavaClass mediaClass = new AndroidJavaClass("android.provider.MediaStore$Images$Media"))
+        {
+            using (AndroidJavaObject imageFile = new AndroidJavaObject("java.io.File", filePath))
+            {
+                using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                {
+                    using (AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+                    {
+                        // Lấy đường dẫn của ứng dụng Unity
+                        string unityPackageName = currentActivity.Call<string>("getPackageName");
+                        AndroidJavaObject unityContentResolver = currentActivity.Call<AndroidJavaObject>("getContentResolver");
+
+                        // Thêm ảnh vào MediaStore
+                        AndroidJavaObject imageUri = mediaClass.CallStatic<AndroidJavaObject>("insertImage", 
+                            unityContentResolver, imageFile.Call<string>("getAbsolutePath"), "Title", "Description");
+                        Debug.Log("Đã thêm ảnh vào MediaStore: " + imageUri);
+                    }
+                }
+            }
+        }
+    }
 }
