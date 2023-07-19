@@ -6,51 +6,40 @@ using UnityEngine;
 
 public class CaptureObjectUI : MonoBehaviour
 {
-    [SerializeField] private RectTransform targetRect;
-    private string folderPath;
-    private Camera _camera;
-     
-    private void Start()
+    public static CaptureObjectUI Ins
     {
-        _camera = Camera.main;
-        
-        //tạo folder để lưu ảnh vảo
-        string pathSafe;
-#if UNITY_EDITOR
-        pathSafe = Application.dataPath;
-#else
-        pathSafe = Application.persistentDataPath;
-#endif
+        get => ins;
+    }
+    private static CaptureObjectUI ins;
 
-        string folderName = "screenshot";
-        
-        folderPath = Path.Combine(pathSafe, folderName);
-
-        if (!Directory.Exists(folderPath))
-        {
-            Directory.CreateDirectory(folderPath);
-        }
-        //
+    private string curPath;
+    
+    public Camera Camera;
+    private void Awake()
+    {
+        if (ins == null) ins = this;
     }
 
-    public void CaptureTargetRect()
+    public void CaptureTargetRect(RectTransform targetRect, string path)
     {
-        StartCoroutine(TakePathScreenShot());
+        curPath = path;
+        StartCoroutine(TakePathScreenShot(targetRect));
     }
 
-    public void CaptureFullScreen()
+    public void CaptureFullScreen(string path)
     {
+        curPath = path;
         StartCoroutine(TakeScreenshotFull());
     }
-    private IEnumerator TakePathScreenShot()
+    private IEnumerator TakePathScreenShot(RectTransform targetRect)
     {
         yield return new WaitForEndOfFrame();
      
         var corners = new Vector3[4];
         targetRect.GetWorldCorners(corners);
-        var bl = RectTransformUtility.WorldToScreenPoint(_camera, corners[0]);
-        var tl = RectTransformUtility.WorldToScreenPoint(_camera, corners[1]);
-        var tr = RectTransformUtility.WorldToScreenPoint(_camera, corners[2]);
+        var bl = RectTransformUtility.WorldToScreenPoint(Camera, corners[0]);
+        var tl = RectTransformUtility.WorldToScreenPoint(Camera, corners[1]);
+        var tr = RectTransformUtility.WorldToScreenPoint(Camera, corners[2]);
      
         var height = tl.y - bl.y;
         var width = tr.x - bl.x;
@@ -62,16 +51,7 @@ public class CaptureObjectUI : MonoBehaviour
         var bytes = tex.EncodeToPNG();
         Destroy(tex);
         
-        File.WriteAllBytes(GetPath(), bytes);
-    }
-
-    private string GetPath()
-    {
-        long milliseconds = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-        string filename = milliseconds + ".png";
-        string filePath = Path.Combine(folderPath, filename);
-        Debug.Log("Path Capture : " + filePath);
-        return filePath;
+        File.WriteAllBytes(curPath, bytes);
     }
 
     // Coroutine để chụp màn hình và lưu ảnh
@@ -92,11 +72,11 @@ public class CaptureObjectUI : MonoBehaviour
 
 
         // Lưu ảnh vào đường dẫn đã chỉ định
-        System.IO.File.WriteAllBytes(GetPath(), bytes);
+        System.IO.File.WriteAllBytes(curPath, bytes);
     }
 
     //Thêm ảnh vào media để hiển thị trên các ứng dụng album của điện thoại
-    public void AddToMedia(string filePath)
+    public bool AddToMedia(string filePath)
     {
         using (AndroidJavaClass mediaClass = new AndroidJavaClass("android.provider.MediaStore$Images$Media"))
         {
@@ -114,9 +94,12 @@ public class CaptureObjectUI : MonoBehaviour
                         AndroidJavaObject imageUri = mediaClass.CallStatic<AndroidJavaObject>("insertImage", 
                             unityContentResolver, imageFile.Call<string>("getAbsolutePath"), "Title", "Description");
                         Debug.Log("Đã thêm ảnh vào MediaStore: " + imageUri);
+                        return true;
                     }
                 }
             }
         }
+
+        return false;
     }
 }
