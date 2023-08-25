@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SpriteHelper
 {
@@ -72,13 +74,51 @@ public class SpriteHelper
     }
 
 
-    public static bool CompareSprites(Sprite sprite1, Sprite sprite2)
+    public static bool CompareSprites(Sprite spriteA, Sprite spriteB)
     {
-        if (!sprite1 || !sprite2) return false;
-        if (sprite1.texture == sprite2.texture && sprite1.rect == sprite2.rect) return true;
-        return false;
+        if (spriteA == null || spriteB == null) return false;
+        Texture2D textureA = DuplicateTexture(spriteA.texture);
+        Texture2D textureB = DuplicateTexture(spriteB.texture);
+
+        if (textureA.width != textureB.width || textureA.height != textureB.height)
+        {
+            return false; // Kích thước khác nhau
+        }
+
+        Color[] pixelsA = textureA.GetPixels();
+        Color[] pixelsB = textureB.GetPixels();
+
+        for (int i = 0; i < pixelsA.Length; i++)
+        {
+            if (pixelsA[i] != pixelsB[i])
+            {
+                return false; // Khác nhau tại pixel thứ i
+            }
+        }
+
+        return true; // Trùng khớp
     }
     
+    public static Texture2D DuplicateTexture(Texture2D source)
+    {
+        RenderTexture renderTex = RenderTexture.GetTemporary(
+            source.width,
+            source.height,
+            0,
+            RenderTextureFormat.Default,
+            RenderTextureReadWrite.Linear);
+
+        Graphics.Blit(source, renderTex);
+        RenderTexture previous = RenderTexture.active;
+        RenderTexture.active = renderTex;
+        Texture2D readableText = new Texture2D(source.width, source.height);
+        readableText.ReadPixels(new Rect(0, 0, renderTex.width, renderTex.height), 0, 0);
+        readableText.Apply();
+        RenderTexture.active = previous;
+        RenderTexture.ReleaseTemporary(renderTex);
+        return readableText;
+    }
+
     public static void ChangeSkin(SpriteRenderer partImage, Sprite partSprite)
     {
         if (!partImage) return;
