@@ -25,7 +25,7 @@ public class LoadingTrasitionSceneUI : MonoBehaviour
     }
     private CanvasGroup _canvasGroup;
 
-    
+
     public void LoadingToScene(String name)
     {
         ResetLoad();
@@ -72,28 +72,6 @@ public class LoadingTrasitionSceneUI : MonoBehaviour
         _canvasGroup.alpha = 0;
     }
     
-    
-    private IEnumerator UpdateLoading(String name)
-    {
-        _canvasGroup.blocksRaycasts = true;
-        _canvasGroup.interactable = true;
-        _canvasGroup.alpha = 1;
-        var asyncOperation = SceneManager.LoadSceneAsync(name);
-        asyncOperation.allowSceneActivation = false;
-        while (!asyncOperation.isDone)
-        {
-            float progress = asyncOperation.progress;
-
-            _sliderLoading.value = progress;
-
-            yield return null;
-        }
-        asyncOperation.allowSceneActivation = true;
-        _canvasGroup.blocksRaycasts = true;
-        _canvasGroup.interactable = true;
-        _canvasGroup.alpha = 0;
-    }
-
     public void ResetLoad()
     {
         _sliderLoading.value = 0;
