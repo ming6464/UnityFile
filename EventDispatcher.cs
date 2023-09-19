@@ -187,3 +187,10 @@ public static class EventDispatcherExtension
     }
 }
 #endregion
+
+#region eventID
+
+[Serializable]
+public enum EventID{}
+#endregion
+
