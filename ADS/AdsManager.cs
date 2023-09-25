@@ -3,6 +3,7 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Firebase.Analytics;
 
 #if USE_FIREBASE
 using Firebase.Analytics;
@@ -493,15 +494,6 @@ public class AdsManager : MonoBehaviour
     {
         ShowMessage("InterstitialOnAdDisplayedEvent AdInfo :" + adInfo);
         ShowMessage("InterstitialOnAdDisplayedEvent AdInfo revenue :" + adInfo.revenue);
-        AppsflyerHelper.LogEvent("af_inters_displayed");
-        PlayerPrefsSave.interCount++;
-        var count = PlayerPrefsSave.interCount;
-        if (PlayerPrefs.HasKey("af_inters_displayed_" + count + "_times") == false)
-        {
-            Debug.Log("Log event af: " + "af_inters_displayed_" + count + "_times");
-            PlayerPrefs.SetString("af_inters_displayed_" + count + "_times", "1");
-            AppsflyerHelper.LogEvent("af_inters_displayed_" + count + "_times");
-        }
     }
     // Invoked when end user clicked on the interstitial ad
     void InterstitialOnAdClickedEvent(IronSourceAdInfo adInfo)
@@ -598,14 +590,7 @@ public class AdsManager : MonoBehaviour
             else
             {
                 actionFail?.Invoke();
-                if (MessageSpawner.Instance != null)
-                {
-                    MessageSpawner.Instance.SpawnMessage("Ads not ready yet!");
-                }
-                else
-                {
-                    ShowMessageNOTCONFIG("Ads not ready yet!");
-                }
+                ShowMessageNOTCONFIG("Ads not ready yet!");
                 
                 if (Util.isInternetConection)
                 {
