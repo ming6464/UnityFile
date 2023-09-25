@@ -78,8 +78,8 @@ public class EventDispatcher : MonoBehaviour
     public void RegisterListener(EventID eventID, Action<object> callback)
     {
         // checking params
-        Common.Assert(callback != null, "AddListener, event {0}, callback = null !!", eventID.ToString());
-        Common.Assert(eventID != EventID.None, "RegisterListener, event = None !!");
+        // Common.Assert(callback != null, "AddListener, event {0}, callback = null !!", eventID.ToString());
+        // Common.Assert(eventID != EventID.None, "RegisterListener, event = None !!");
 
         // check if listener exist in distionary
         if (_listeners.ContainsKey(eventID))
@@ -133,8 +133,8 @@ public class EventDispatcher : MonoBehaviour
     public void RemoveListener(EventID eventID, Action<object> callback)
     {
         // checking params
-        Common.Assert(callback != null, "RemoveListener, event {0}, callback = null !!", eventID.ToString());
-        Common.Assert(eventID != EventID.None, "AddListener, event = None !!");
+        // Common.Assert(callback != null, "RemoveListener, event {0}, callback = null !!", eventID.ToString());
+        // Common.Assert(eventID != EventID.None, "AddListener, event = None !!");
 
         if (_listeners.ContainsKey(eventID))
         {
@@ -147,7 +147,7 @@ public class EventDispatcher : MonoBehaviour
         }
         else
         {
-            Common.Warning(false, "RemoveListener, not found key : " + eventID);
+           // Common.Warning(false, "RemoveListener, not found key : " + eventID);
         }
     }
 
@@ -191,6 +191,42 @@ public static class EventDispatcherExtension
 #region eventID
 
 [Serializable]
-public enum EventID{}
+public enum EventID{
+    None = 0,
+    OnGameStageChange,
+    OnMegerPlayer,
+    OnSpawnCharRange,
+    OnSpawnCharRangeHack,
+    OnSpawnCharMelee,
+    OnSpawnCharMeleeHack,
+    StartFight,
+    OnCharDie,
+    OnShowNewChar,
+    OnPreWin,
+    OnWin,
+    OnPreFail,
+    OnFail,
+    OnShowDialogSeting,
+    OnShowDialogCard,
+    OnSpawnCharSave,
+    OnReadyStartFight,
+    OnUpdateCoin,
+    OnCompliteLoad,
+    OnShowFx,
+    OnDragChar,
+    OnEndDragChar,
+    OnShowUIWaitAds,
+    OnShowFxCoin,
+    OnLoadConfigDataLevel,
+    OnRetryCheckInternet,
+    OnCheckBossReady,
+    OnShowAdsInterstitial,
+    OnSpawnChest,
+    OnHideUI,
+    OnShowUI,
+    OnShowUILoad,
+    OnShowUIChoseLevel,
+    OnHideUIChoseLevel,
+}
 #endregion
 
