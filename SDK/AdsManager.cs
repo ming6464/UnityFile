@@ -33,7 +33,7 @@ namespace AudienceNetwork
 public class AdsManager : MonoBehaviour
 {
     public static AdsManager instance;
-    private bool doneAdsInterval = true;    // True đã countdown xong và cho phép hiển thị, false thì chưa
+    public bool IsShowedInter;
     private WaitForSecondsRealtime waitRewarded;
     private DateTime timePauseGane;
     private int timePausedGane;
@@ -151,10 +151,18 @@ public class AdsManager : MonoBehaviour
     private void OnEnable()
     {
         IronSourceEvents.onImpressionDataReadyEvent += OnImpressionDataReady;
+        this.RegisterListener(EventID.OnRetryCheckInternet, OnTryInitAndRequestAd);
+    }
+
+    private void OnTryInitAndRequestAd(object obj)
+    {
+        Debug.Log("OnTryInitAndRequestAd");
+        TryInitAndRequestAd();
     }
 
     private void OnDisable()
     {
+        EventDispatcher.Instance?.RemoveListener(EventID.OnRetryCheckInternet, OnTryInitAndRequestAd);
         IronSourceEvents.onImpressionDataReadyEvent -= OnImpressionDataReady;
     }
     private void OnImpressionDataReady(IronSourceImpressionData impressionData)
@@ -163,6 +171,7 @@ public class AdsManager : MonoBehaviour
         TrackAdRevenue(impressionData);
         AppsflyerHelper.instance.OnAdRevenuePaidEvent(impressionData);
     }
+
     public void TryInitAndRequestAd()
     {
 #if USE_APPLOVIN
@@ -250,9 +259,6 @@ public class AdsManager : MonoBehaviour
 #if USE_FIREBASE_LOG_EVENT
                 FirebaseHelper.LogEvent("ad_inter_load");
 #endif
-#if USE_APPSFLYER
-                AppsflyerHelper.LogEvent("af_inters_successfullyloaded");
-#endif
             }
             else
             {
@@ -273,6 +279,8 @@ public class AdsManager : MonoBehaviour
 
     public void CheckShowInterstitial(Action callBack = null)
     {
+        Debug.Log("af_inters_ad_eligible");
+        if (callBack == null) callBack = delegate { };
         if (!isShowReviewAdsUnityEditor)
         {
 #if UNITY_EDITOR
@@ -280,6 +288,7 @@ public class AdsManager : MonoBehaviour
             return;
 #endif
         }
+        LogEventAppsflyerHelper("af_inters_ad_eligible");
         int adTimer = 0;
 #if USE_FIREBASE_REMOTE_CONFIG && USE_FIREBASE
         adTimer = RemoteConfigControl.instance.ads_interval;
@@ -369,9 +378,6 @@ public class AdsManager : MonoBehaviour
 #if USE_FIREBASE_LOG_EVENT
             FirebaseHelper.LogEvent("ad_inter_show");
 #endif
-#if USE_APPSFLYER
-            AppsflyerHelper.LogEvent("af_inters_displayed");
-#endif
         }
         else
         {
@@ -431,9 +437,6 @@ public class AdsManager : MonoBehaviour
 #if USE_FIREBASE_LOG_EVENT
         FirebaseHelper.LogEvent("inter_ad");
 #endif
-#if USE_APPSFLYER
-        AppsflyerHelper.LogEvent("inter_ad");
-#endif
     }
 
     private void InterstitialOnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
@@ -479,6 +482,7 @@ public class AdsManager : MonoBehaviour
     // Invoked when the interstitial ad was loaded succesfully.
     void InterstitialOnAdReadyEvent(IronSourceAdInfo adInfo)
     {
+        LogEventAppsflyerHelper("af_inters_api_called");
         interstitialRetryAttempt = 0;
         int time = (int)Time.time - tracking_timeLoadAds;
     }
@@ -492,6 +496,8 @@ public class AdsManager : MonoBehaviour
     // Invoked when the Interstitial Ad Unit has opened. This is the impression indication. 
     void InterstitialOnAdOpenedEvent(IronSourceAdInfo adInfo)
     {
+        Debug.Log("af_inters_displayed");
+        LogEventAppsflyerHelper("af_inters_displayed");
         ShowMessage("InterstitialOnAdDisplayedEvent AdInfo :" + adInfo);
         ShowMessage("InterstitialOnAdDisplayedEvent AdInfo revenue :" + adInfo.revenue);
     }
@@ -520,6 +526,9 @@ public class AdsManager : MonoBehaviour
     void InterstitialOnAdClosedEvent(IronSourceAdInfo adInfo)
     {
         // Interstitial ad is hidden. Pre-load the next ad
+
+        IsShowedInter = true;
+        
         ShowMessage("Interstitial dismissed - end pause game");
 
         if (actionFullAds != null)
@@ -556,10 +565,13 @@ public class AdsManager : MonoBehaviour
     #region Rewarded Ad Methods
     public void ShowRewardVideo(Action actionDone, Action actionFail, string position = "")
     {
+        
+        Debug.Log("af_rewarded_ad_eligible");
 #if UNITY_EDITOR
         actionDone?.Invoke();
         return;
 #endif
+        LogEventAppsflyerHelper("af_rewarded_ad_eligible");
         bool is_ads = true;
 #if USE_FIREBASE_REMOTE_CONFIG
         is_ads = RemoteConfigControl.instance.is_ads;
@@ -569,10 +581,6 @@ public class AdsManager : MonoBehaviour
             ShowMessage($"Show Reward Ads: {position}");
             if (!isShowReviewAdsUnityEditor)
             {
-#if UNITY_EDITOR
-                actionDone?.Invoke();
-                return;
-#endif
             }
 
 #if USE_IRON_SOURCE
@@ -583,9 +591,6 @@ public class AdsManager : MonoBehaviour
                 timePauseGane = DateTime.Now;
                 IronSource.Agent.showRewardedVideo(position);
                 Util.CountShowReward++;
-#if USE_APPSFLYER
-                AppsflyerHelper.Log(AppsflyerHelper.eventId.af_rewarded_ad_displayed);
-#endif
             }
             else
             {
@@ -612,9 +617,6 @@ public class AdsManager : MonoBehaviour
             Util.CountShowReward++;
 #if USE_FIREBASE_LOG_EVENT
             FirebaseHelper.LogEvent("show_reward", new System.Collections.Generic.Dictionary<string, object> { { "count_show", Util.CountShowReward } });
-#endif
-#if USE_APPSFLYER
-            AppsflyerHelper.LogEvent("af_rewarded_displayed");
 #endif
         }
         else
@@ -684,9 +686,6 @@ public class AdsManager : MonoBehaviour
 #if USE_FIREBASE_LOG_EVENT
             FirebaseHelper.LogEvent("ad_rewarded_load");
 #endif
-#if USE_APPSFLYER
-           // AppsflyerHelper.LogEvent("af_rewarded_successfullyloaded");
-#endif
         }
 #endif
 #if USE_IRON_SOURCE
@@ -694,9 +693,6 @@ public class AdsManager : MonoBehaviour
         {
             ShowMessage("Load Rewarded Ads - Iron source");
             IronSource.Agent.loadRewardedVideo();
-#if USE_APPSFLYER
-            AppsflyerHelper.Log(AppsflyerHelper.eventId.af_rewarded_api_called);
-#endif
         }
 #endif
     }
@@ -709,9 +705,6 @@ public class AdsManager : MonoBehaviour
 
         // Reset retry attempt
         rewardedRetryAttempt = 0;
-#if USE_APPSFLYER
-        //AppsflyerHelper.LogEvent("af_rewarded_successfullyloaded");
-#endif
     }
 
     private void RewardedOnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
@@ -814,10 +807,8 @@ public class AdsManager : MonoBehaviour
     // This replaces the RewardedVideoAvailabilityChangedEvent(true) event
     void RewardedVideoOnAdAvailable(IronSourceAdInfo adInfo)
     {
+        LogEventAppsflyerHelper("af_rewarded_api_called");
         rewardedRetryAttempt = 0;
-#if USE_APPSFLYER
-        //AppsflyerHelper.LogEvent("af_rewarded_successfullyloaded");
-#endif
     }
     // Indicates that no ads are available to be displayed
     // This replaces the RewardedVideoAvailabilityChangedEvent(false) event
@@ -832,6 +823,7 @@ public class AdsManager : MonoBehaviour
     // The Rewarded Video ad view has opened. Your activity will loose focus.
     void RewardedVideoOnAdOpenedEvent(IronSourceAdInfo adInfo)
     {
+        LogEventAppsflyerHelper("af_rewarded_ad_displayed");
         ShowMessage("Rewarded ad displayed - pause game show ads reward");
         ShowMessage("RewardedOnAdDisplayedEvent AdInfo :" + adInfo);
         ShowMessage("RewardedOnAdDisplayedEvent AdInfo revenue :" + adInfo.revenue);
@@ -1183,4 +1175,13 @@ public class AdsManager : MonoBehaviour
         FirebaseAnalytics.LogEvent("ad_impression", impressionParameters);
     }
 #endif
+
+    public void LogEventAppsflyerHelper(string eventKey)
+    {
+        Debug.Log($"LogEventAppsflyer : {eventKey}" );
+#if USE_APPSFLYER
+        AppsflyerHelper.LogEvent(eventKey);
+#endif
+    }
+
 }
