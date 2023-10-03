@@ -56,8 +56,17 @@ public class JsonHelper
 
 public static class JsonHelperExtension
 {
-    public static T CloneViaJson<T>(T source)
+    public static T CloneObjectViaJson<T>(T source)
     {
         return JsonHelper.FromJson<T>(JsonHelper.ToJson(source));
     }
+    public static List<T> CloneListViaJson<T>(List<T> source)
+    {
+        return JsonHelper.FromJsonList<T>(JsonHelper.ToJson(source));
+    }
+    public static T[] CloneArrayViaJson<T>(T[] source)
+    {
+        return JsonHelper.FromJsonArray<T>(JsonHelper.ToJson(source));
+    }
+    
 }
