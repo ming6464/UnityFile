@@ -9,3 +9,7 @@
 - In game Debug Console
 - Dropdown Attribute (tạo ra dropdown ở inspector)
 
+
+#Excel
+- Excel có hướng dẫn add quảng cáo có admod https://docs.google.com/spreadsheets/d/19aBz2ajpiIBSDCmUMlp9osqPuQR2sTeThUHN7N0tA0o/edit?usp=sharing
+
