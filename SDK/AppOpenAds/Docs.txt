@@ -1,0 +1,23 @@
+// Để có thể gọi app open ads 
+// thêm đoạn code sau vào 1 class nào đó mà bạn muốn mở app open ads
+private void Start()
+    {
+        MobileAds.Initialize((initStatus) =>
+        {
+            Debug.Log("app open add init");
+            //AppOpenAdController.Instance.LoadAd();
+            AppOpenAdManager.Instance.LoadAOA();
+            AppStateEventNotifier.AppStateChanged += OnAppStateChanged;
+        });
+    }
+    public void OnAppStateChanged(AppState state)
+    {
+        if (state == AppState.Foreground)
+        {
+            // TODO: Show an app open ad if available.
+            Debug.Log("App state change");
+            if(!GameConfig.IsNoAd)
+                if(!AdsManager.IsAdsShowing)
+                    AppOpenAdManager.Instance.ShowAdIfAvailable();
+        }
+    }
