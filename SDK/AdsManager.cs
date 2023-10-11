@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Firebase.Analytics;
+using UnityEngine.SceneManagement;
 
 #if USE_FIREBASE
 using Firebase.Analytics;
@@ -57,7 +58,7 @@ public class AdsManager : MonoBehaviour
 #if USE_IRON_SOURCE
     [SerializeField] private string IronSourceAppKey;
     [SerializeField] private IronSourceBannerPosition bannerPosition;
-    [SerializeField] private IronSourceBannerPosition mrecPosition;
+    [SerializeField] private IronSourceBannerPosition mRecPosition;
 #endif
     [SerializeField] bool showUIWaitAds;
     [SerializeField] bool isShowReviewAdsUnityEditor;
@@ -84,6 +85,10 @@ public class AdsManager : MonoBehaviour
         if (instance != null)
             Destroy(gameObject);
         else instance = this;
+        
+        //enable if have ironsource ad quality
+        //IronSourceAdQuality.Initialize(IronSourceAppKey);
+        
     }
 
 
@@ -277,7 +282,7 @@ public class AdsManager : MonoBehaviour
 #endif
     }
 
-    public void CheckShowInterstitial(Action callBack = null)
+    public void CheckShowInterstitial(Action callBack = null,string placementName = null)
     {
         Debug.Log("af_inters_ad_eligible");
         if (callBack == null) callBack = delegate { };
@@ -298,7 +303,7 @@ public class AdsManager : MonoBehaviour
         if (Util.timeNow - (Util.timeLastShowAds + timePausedGane) >= adTimer)
         {
             //Util.timeLastShowAds = Util.timeNow;
-            StartCoroutine(DelayShowAdUnit(callBack));
+            StartCoroutine(DelayShowAdUnit(callBack,placementName));
         }
         else
         {
@@ -306,7 +311,7 @@ public class AdsManager : MonoBehaviour
             callBack?.Invoke();
         }
     }
-    public void ShowInterstitialResume(Action callBack = null)
+    public void ShowInterstitialResume(Action callBack = null,string placementName = null)
     {
         if (!isShowReviewAdsUnityEditor)
         {
@@ -315,10 +320,10 @@ public class AdsManager : MonoBehaviour
             return;
 #endif
         }
-        StartCoroutine(DelayShowAdUnit(callBack));
+        StartCoroutine(DelayShowAdUnit(callBack,placementName));
     }
     
-    IEnumerator DelayShowAdUnit(Action actionDone)
+    IEnumerator DelayShowAdUnit(Action actionDone,string placementName = null)
     {
         if (showUIWaitAds)
         {
@@ -336,7 +341,7 @@ public class AdsManager : MonoBehaviour
             }
         }
 #elif !UNITY_EDITOR
-        ShowAdUnit(actionDone);
+        ShowAdUnit(actionDone,placementName);
         if (showUIWaitAds)
         {
             this.PostEvent(EventID.OnShowUIWaitAds, false);
@@ -344,7 +349,7 @@ public class AdsManager : MonoBehaviour
 #endif
     }
 
-    public void ShowAdUnit(Action actionDone)
+    public void ShowAdUnit(Action actionDone,string placementName = null)
     {
 #if UNITY_EDITOR
         if (!isShowReviewAdsUnityEditor)
@@ -394,7 +399,15 @@ public class AdsManager : MonoBehaviour
             {
                 if (actionDone != null) actionFullAds = actionDone;
                 isAdsShowing = true;
-                IronSource.Agent.showInterstitial();
+
+                if (string.IsNullOrEmpty(placementName))
+                {
+                    IronSource.Agent.showInterstitial();
+                }
+                else
+                {
+                    IronSource.Agent.showInterstitial(placementName);
+                }
                 ShowMessage("Show Full Ads Complite");
             }
             else
@@ -563,10 +576,9 @@ public class AdsManager : MonoBehaviour
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------
     #region Rewarded Ad Methods
-    public void ShowRewardVideo(Action actionDone, Action actionFail, string position = "")
+    public void ShowRewardVideo(Action actionDone, Action actionFail, string placementName = null)
     {
         
-        Debug.Log("af_rewarded_ad_eligible");
 #if UNITY_EDITOR
         actionDone?.Invoke();
         return;
@@ -578,7 +590,7 @@ public class AdsManager : MonoBehaviour
 #endif
         if (is_ads)
         {
-            ShowMessage($"Show Reward Ads: {position}");
+            ShowMessage($"Show Reward Ads: {placementName}");
             if (!isShowReviewAdsUnityEditor)
             {
             }
@@ -589,7 +601,15 @@ public class AdsManager : MonoBehaviour
                 if (actionDone != null) actionRewarded = actionDone;
                 isAdsShowing = true;
                 timePauseGane = DateTime.Now;
-                IronSource.Agent.showRewardedVideo(position);
+                if (string.IsNullOrEmpty(placementName))
+                {
+                    IronSource.Agent.showRewardedVideo();
+                }
+                else
+                {
+                    IronSource.Agent.showRewardedVideo(placementName);
+                }
+                
                 Util.CountShowReward++;
             }
             else
@@ -888,6 +908,9 @@ public class AdsManager : MonoBehaviour
         ShowMessage("Rewarded ad failed to display with adinfo : " + adInfo);
 
         Invoke("LoadRewardedAd", 0.5f);
+        
+        Debug.Log("MAX > Rewarded ad failed to load with error code: " + error.ToString());
+        
     }
     // Invoked when the video ad was clicked.
     // This callback is not supported by all networks, and we recommend using it only if
