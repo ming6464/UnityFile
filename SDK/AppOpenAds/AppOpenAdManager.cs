@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using GoogleMobileAds.Api;
 using System;
+#if USE_APPSFLYER
 using AppsFlyerSDK;
+#endif
 
 public class AppOpenAdManager
 {
@@ -161,13 +163,29 @@ public class AppOpenAdManager
     {
         Debug.LogFormat("Received paid event. (currency: {0}, value: {1}",
             args.AdValue.CurrencyCode, args.AdValue.Value);
+        AdValue adValue = args.AdValue;
+        double valueMicros = adValue.Value / 1000f;
+        string currencyCode = adValue.CurrencyCode;
+#if USE_FIREBASE_LOG_EVENT
+        var impressionParameters = new[] {
+            new Parameter ("ad_platform", "Admob"),
+            new Parameter ("value", valueMicros),
+            new Parameter ("currency", currencyCode), // All AppLovin revenue is sent in USD
+        };
+        Debug.Log("Track AOA Revenue AdFormat: " + valueMicros);
+        FirebaseAnalytics.LogEvent("ad_impression", impressionParameters);
+#endif
 
+
+#if USE_APPSFLYER
         Dictionary<string, string> additionalParameters = new Dictionary<string, string>();
         additionalParameters.Add("ad_platform", "Admob");
-        additionalParameters.Add("value", args.AdValue.Value.ToString());
-        additionalParameters.Add("currency", args.AdValue.CurrencyCode);
+        additionalParameters.Add("value", valueMicros.ToString());
+        additionalParameters.Add("currency", currencyCode);
         AppsFlyerAdRevenue.logAdRevenue("Admob",
             AppsFlyerAdRevenueMediationNetworkType.AppsFlyerAdRevenueMediationNetworkTypeGoogleAdMob,
             args.AdValue.Value, args.AdValue.CurrencyCode, additionalParameters);
+#endif
+        
     }
 }

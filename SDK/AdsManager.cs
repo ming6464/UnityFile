@@ -174,7 +174,9 @@ public class AdsManager : MonoBehaviour
     {
         Debug.Log("OnImpressionDataReadyEvent :" + impressionData);
         TrackAdRevenue(impressionData);
-        AppsflyerHelper.instance.OnAdRevenuePaidEvent(impressionData);
+#if USE_APPSFLYER
+    AppsflyerHelper.instance.OnAdRevenuePaidEvent(impressionData);
+#endif
     }
 
     public void TryInitAndRequestAd()

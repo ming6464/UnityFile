@@ -1,3 +1,5 @@
+nếu sdk admob từ 8.5 thì dùng AppOpenAdManager.version8.5.cs
+
 // Để có thể gọi app open ads 
 // thêm đoạn code sau vào 1 class nào đó mà bạn muốn mở app open ads
 private void Start()
