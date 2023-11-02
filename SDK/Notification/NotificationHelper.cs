@@ -157,9 +157,30 @@ public class NotificationHelper : MonoBehaviour
 #if UNITY_ANDROID
     void Initialize()
     {
-        var androidChannel = new AndroidNotificationChannel(this._Channel_Id, this._Channel_Title,
-            this._Channel_Description, Importance.Default);
-        AndroidNotificationCenter.RegisterNotificationChannel(androidChannel);
+        //add our channel
+        //a channel can be used by more than one notification
+        //you do not have to check if the channel is already created, Android OS will take care of that logic
+        if (GetVersionAndroid() >= 8.0f)
+        {
+            AndroidNotificationChannel androidChannel = new AndroidNotificationChannel(this._Channel_Id, this._Channel_Title, this._Channel_Description, Importance.Default);
+            AndroidNotificationCenter.RegisterNotificationChannel(androidChannel);
+        }
+    }
+
+    private float GetVersionAndroid()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+    try
+        {
+            AndroidJavaClass version = new AndroidJavaClass("android.os.Build$VERSION");
+            return float.Parse(version.GetStatic<string>("RELEASE"));
+        }
+        catch (Exception e)
+        {
+            return 0;
+        }
+#endif
+        return 0;
     }
 
     void SetUpCancelNotiWhenRunning()
