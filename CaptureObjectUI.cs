@@ -78,6 +78,7 @@ public class CaptureObjectUI : MonoBehaviour
     //Thêm ảnh vào media để hiển thị trên các ứng dụng album của điện thoại
     public bool AddToMedia(string filePath)
     {
+#if !UNITY_EDITOR        
         using (AndroidJavaClass mediaClass = new AndroidJavaClass("android.provider.MediaStore$Images$Media"))
         {
             using (AndroidJavaObject imageFile = new AndroidJavaObject("java.io.File", filePath))
@@ -87,19 +88,23 @@ public class CaptureObjectUI : MonoBehaviour
                     using (AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
                     {
                         // Lấy đường dẫn của ứng dụng Unity
-                        string unityPackageName = currentActivity.Call<string>("getPackageName");
                         AndroidJavaObject unityContentResolver = currentActivity.Call<AndroidJavaObject>("getContentResolver");
-
                         // Thêm ảnh vào MediaStore
                         AndroidJavaObject imageUri = mediaClass.CallStatic<AndroidJavaObject>("insertImage", 
                             unityContentResolver, imageFile.Call<string>("getAbsolutePath"), "Title", "Description");
-                        Debug.Log("Đã thêm ảnh vào MediaStore: " + imageUri);
-                        return true;
+
+                        if (imageUri != null)
+                        {
+                            Debug.Log("Đã thêm ảnh vào MediaStore: " + imageUri);
+                            return true;
+                        }
+                        Debug.LogError("Lỗi khi thêm ảnh vào MediaStore.");
+                        return false;
                     }
                 }
             }
         }
-
+#endif
         return false;
     }
 }
