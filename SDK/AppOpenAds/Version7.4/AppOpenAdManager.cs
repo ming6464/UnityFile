@@ -8,7 +8,7 @@ using Firebase.Analytics;
 using AppsFlyerSDK;
 #endif
 
-public class AppOpenAdManager_version8_5
+public class AppOpenAdManager
 {
     private const string test_Key = "ca-app-pub-3940256099942544/3419835294";
     private bool isEnableTest = false;
@@ -25,7 +25,7 @@ public class AppOpenAdManager_version8_5
     private const string ID_TIER_3 = "";
 #endif
 
-    private static AppOpenAdManager_version8_5 instance;
+    private static AppOpenAdManager instance;
 
     private AppOpenAd _appOpenAd;
 
@@ -40,13 +40,13 @@ public class AppOpenAdManager_version8_5
 
     public static bool AdsActive = true;
     
-    public static AppOpenAdManager_version8_5 Instance
+    public static AppOpenAdManager Instance
     {
         get
         {
             if (instance == null)
             {
-                instance = new AppOpenAdManager_version8_5();
+                instance = new AppOpenAdManager();
             }
 
             return instance;
@@ -121,7 +121,8 @@ public class AppOpenAdManager_version8_5
             new Parameter("ad_format", "Open Ads"),
             new Parameter ("currency", currencyCode), // All AppLovin revenue is sent in USD
         };
-        Debug.Log("Track AOA Revenue AdFormat: " + valueMicros);
+        string text = $"ad_platform : admob\nvalue : {valueMicros}\nad_source : {adSourceName}\nad_unit_name : {adSourceId}\nad_format : Native Ads\ncurrency : {currencyCode}";
+        Debug.Log("Track AOA Revenue AdFormat(AOA): " + text);
         FirebaseAnalytics.LogEvent("ad_impression", impressionParameters);
 #endif
 
@@ -157,7 +158,7 @@ public class AppOpenAdManager_version8_5
             Debug.Log("App open ad full screen content closed.");
             EventDispatcher.Instance.PostEvent(EventID.OnShowHomeScene);
             Debug.Log("Closed app open ad");
-            // Set the ad to null to indicate that AppOpenAdManager_version8_5 no longer has another ad to show.
+            // Set the ad to null to indicate that AppOpenAdManager no longer has another ad to show.
             isShowingAd = false;
             LoadAOA();
         };
