@@ -12,5 +12,8 @@
 
 
 #Excel
-- Excel có hướng dẫn add quảng cáo có admod https://docs.google.com/spreadsheets/d/19aBz2ajpiIBSDCmUMlp9osqPuQR2sTeThUHN7N0tA0o/edit?usp=sharing
-
+- thứ tự add sdk Quảng cáo: 
++ External Dependency
++ Firebase
++ Admob
++ IS  or Max
