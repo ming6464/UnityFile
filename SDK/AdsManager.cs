@@ -85,10 +85,10 @@ public class AdsManager : MonoBehaviour
         if (instance != null)
             Destroy(gameObject);
         else instance = this;
-        
+
         //enable if have ironsource ad quality
         //IronSourceAdQuality.Initialize(IronSourceAppKey);
-        
+
     }
 
 
@@ -284,7 +284,7 @@ public class AdsManager : MonoBehaviour
 #endif
     }
 
-    public void CheckShowInterstitial(Action callBack = null,string placementName = null)
+    public void CheckShowInterstitial(Action callBack = null, string placementName = null)
     {
         Debug.Log("af_inters_ad_eligible");
         if (callBack == null) callBack = delegate { };
@@ -305,7 +305,7 @@ public class AdsManager : MonoBehaviour
         if (Util.timeNow - (Util.timeLastShowAds + timePausedGane) >= adTimer)
         {
             //Util.timeLastShowAds = Util.timeNow;
-            StartCoroutine(DelayShowAdUnit(callBack,placementName));
+            StartCoroutine(DelayShowAdUnit(callBack, placementName));
         }
         else
         {
@@ -313,7 +313,7 @@ public class AdsManager : MonoBehaviour
             callBack?.Invoke();
         }
     }
-    public void ShowInterstitialResume(Action callBack = null,string placementName = null)
+    public void ShowInterstitialResume(Action callBack = null, string placementName = null)
     {
         if (!isShowReviewAdsUnityEditor)
         {
@@ -322,10 +322,10 @@ public class AdsManager : MonoBehaviour
             return;
 #endif
         }
-        StartCoroutine(DelayShowAdUnit(callBack,placementName));
+        StartCoroutine(DelayShowAdUnit(callBack, placementName));
     }
-    
-    IEnumerator DelayShowAdUnit(Action actionDone,string placementName = null)
+
+    IEnumerator DelayShowAdUnit(Action actionDone, string placementName = null)
     {
         if (showUIWaitAds)
         {
@@ -343,7 +343,7 @@ public class AdsManager : MonoBehaviour
             }
         }
 #elif !UNITY_EDITOR
-        ShowAdUnit(actionDone,placementName);
+        ShowAdUnit(actionDone, placementName);
         if (showUIWaitAds)
         {
             this.PostEvent(EventID.OnShowUIWaitAds, false);
@@ -351,7 +351,7 @@ public class AdsManager : MonoBehaviour
 #endif
     }
 
-    public void ShowAdUnit(Action actionDone,string placementName = null)
+    public void ShowAdUnit(Action actionDone, string placementName = null)
     {
 #if UNITY_EDITOR
         if (!isShowReviewAdsUnityEditor)
@@ -479,6 +479,8 @@ public class AdsManager : MonoBehaviour
         // Interstitial ad is hidden. Pre-load the next ad
         ShowMessage("Interstitial dismissed - end pause game");
 
+        timePausedGane = 0;
+
         if (actionFullAds != null)
         {
             actionFullAds.Invoke();
@@ -580,7 +582,7 @@ public class AdsManager : MonoBehaviour
     #region Rewarded Ad Methods
     public void ShowRewardVideo(Action actionDone, Action actionFail, string placementName = null)
     {
-        
+
 #if UNITY_EDITOR
         actionDone?.Invoke();
         return;
@@ -635,6 +637,7 @@ public class AdsManager : MonoBehaviour
         {
             if (actionDone != null) actionRewarded = actionDone;
             isAdsShowing = true;
+            timePauseGane = DateTime.Now;
             MaxSdk.ShowRewardedAd(RewardedAdUnitId);
             Util.CountShowReward++;
 #if USE_FIREBASE_LOG_EVENT
@@ -773,6 +776,9 @@ public class AdsManager : MonoBehaviour
     private void RewardedOnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
     {
         // Rewarded ad is hidden. Pre-load the next ad
+
+        timePausedGane += Util.GetTime(DateTime.Now) - Util.GetTime(timePauseGane);
+
         ShowMessage("Rewarded ad dismissed - end pause game");
 
         Invoke("LoadRewardedAd", 0.5f);
@@ -873,13 +879,10 @@ public class AdsManager : MonoBehaviour
 
     private void ResetState()
     {
-        StartCoroutine(FasleIsShowing());
-    }
-
-    private IEnumerator FasleIsShowing()
-    {
-        yield return .5f;
-        isAdsShowing = false;
+        DOVirtual.DelayedCall(1, delegate
+        {
+            isAdsShowing = false;
+        });
     }
     
     // The user completed to watch the video, and should be rewarded.
@@ -1128,7 +1131,7 @@ public class AdsManager : MonoBehaviour
     {
     }
 #endif
-#endregion
+    #endregion
 
 
 
@@ -1203,7 +1206,7 @@ public class AdsManager : MonoBehaviour
 
     public void LogEventAppsflyerHelper(string eventKey)
     {
-        Debug.Log($"LogEventAppsflyer : {eventKey}" );
+        Debug.Log($"LogEventAppsflyer : {eventKey}");
 #if USE_APPSFLYER
         AppsflyerHelper.LogEvent(eventKey);
 #endif
