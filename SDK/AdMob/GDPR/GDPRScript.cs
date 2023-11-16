@@ -1,98 +1,82 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
+using GoogleMobileAds.Api;
 using UnityEngine;
 using GoogleMobileAds.Ump;
 using GoogleMobileAds.Ump.Api;
 
 public class GDPRScript : MonoBehaviour
 {
-    ConsentForm _consentForm;
-    // Start is called before the first frame update
+    void LoadAds()
+    {
+        Debug.Log("gdpr _ app open add init");
+    }
+
     void Start()
     {
         var debugSettings = new ConsentDebugSettings
         {
-            // Geography appears as in EEA for debug devices.
             DebugGeography = DebugGeography.EEA,
             TestDeviceHashedIds = new List<string>
             {
 
             }
         };
-
-        // Here false means users are not under age.
         ConsentRequestParameters request = new ConsentRequestParameters
         {
             TagForUnderAgeOfConsent = false,
-            ConsentDebugSettings = debugSettings,
+
+
+            //nếu bật preview trong unity thì tắt commet code dưới
+            //ConsentDebugSettings = debugSettings,
         };
+
+
+        Debug.Log("gdpr _ 1");
 
         // Check the current consent information status.
         ConsentInformation.Update(request, OnConsentInfoUpdated);
     }
 
-    void OnConsentInfoUpdated(FormError error)
+
+
+    void OnConsentInfoUpdated(FormError consentError)
     {
-        if (error != null)
+        Debug.Log("gdpr _ 2");
+        if (consentError != null)
         {
+            Debug.Log("gdpr _ 3");
             // Handle the error.
-            UnityEngine.Debug.LogError(error);
+            LoadAds();
+            UnityEngine.Debug.Log(consentError);
             return;
         }
+        Debug.Log("gdpr _ 4");
 
-        if (ConsentInformation.IsConsentFormAvailable())
-        {
-            LoadConsentForm();
-        }
+        //sử lý bắt sự kiện show bảng gdpr ở đây
+
         // If the error is null, the consent information state was updated.
         // You are now ready to check if a form is available.
-    }
-
-    void LoadConsentForm()
-    {
-        // Loads a consent form.
-        ConsentForm.Load(OnLoadConsentForm);
-    }
-
-    void OnLoadConsentForm(ConsentForm consentForm, FormError error)
-    {
-        if (error != null)
+        ConsentForm.LoadAndShowConsentFormIfRequired((FormError formError) =>
         {
-            // Handle the error.
-            UnityEngine.Debug.LogError(error);
-            return;
-        }
-
-        // The consent form was loaded.
-        // Save the consent form for future requests.
-        _consentForm = consentForm;
-
-        // You are now ready to show the form.
-        if (ConsentInformation.ConsentStatus == ConsentStatus.Required)
-        {
-            this.PostEvent(EventID.OnShowGDPR, true);
-            _consentForm.Show(OnShowForm);
-        }
-    }
-
-
-    void OnShowForm(FormError error)
-    {
-        if (error != null)
-        {
-            // Handle the error.
-            UnityEngine.Debug.LogError(error);
-            return;
-        }
-        this.PostEvent(EventID.OnShowGDPR, false);
-        this.PostEvent(EventID.OnAcceptGDPR, true);
-        // Handle dismissal by reloading form.
-        LoadConsentForm();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
+            Debug.Log("gdpr _ 5");
+            if (formError != null)
+            {
+                Debug.Log("gdpr _ 6");
+                // Consent gathering failed.
+                UnityEngine.Debug.Log(consentError);
+                return;
+            }
+            Debug.Log("gdpr _ 7");
+            //sử lý bắt sự kiện click cho phép ở đây
+            // Consent has been gathered.
+            if (ConsentInformation.CanRequestAds())
+            {
+                Debug.Log("gdpr _ 8");
+                LoadAds();
+            }
+        });
 
     }
 }
