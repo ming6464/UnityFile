@@ -36,7 +36,7 @@ public class EventDispatcher : MonoBehaviour
         if (s_instance != null && s_instance.GetInstanceID() != this.GetInstanceID())
         {
             // Destroy this instances because already exist the singleton of EventsDispatcer
-           // Common.Log("An instance of EventDispatcher already exist : <{1}>, So destroy this instance : <{2}>!!", s_instance.name, name);
+            // Common.Log("An instance of EventDispatcher already exist : <{1}>, So destroy this instance : <{2}>!!", s_instance.name, name);
             Destroy(gameObject);
         }
         else
@@ -143,11 +143,11 @@ public class EventDispatcher : MonoBehaviour
                 _listeners[eventID] -= callback;
             }
             catch (Exception e)
-            {}
+            { }
         }
         else
         {
-           // Common.Warning(false, "RemoveListener, not found key : " + eventID);
+            // Common.Warning(false, "RemoveListener, not found key : " + eventID);
         }
     }
 
@@ -191,14 +191,10 @@ public static class EventDispatcherExtension
 #region eventID
 
 [Serializable]
-public enum EventID{
+public enum EventID
+{
     None = 0,
     OnGameStageChange,
-    OnMegerPlayer,
-    OnSpawnCharRange,
-    OnSpawnCharRangeHack,
-    OnSpawnCharMelee,
-    OnSpawnCharMeleeHack,
     StartFight,
     OnCharDie,
     OnShowNewChar,
@@ -227,6 +223,10 @@ public enum EventID{
     OnShowUILoad,
     OnShowUIChoseLevel,
     OnHideUIChoseLevel,
+    OnChangeSateLoadAOA,
+    OnCloseAOA,
+    OnShowGDPR,
+    OnAcceptGDPR
 }
 #endregion
 

@@ -39,7 +39,7 @@ public class AppOpenAdManager
 
 
     public static bool AdsActive = true;
-    
+
     public static AppOpenAdManager Instance
     {
         get
@@ -64,7 +64,7 @@ public class AppOpenAdManager
 
     public void LoadAOA()
     {
-        if(!AdsActive) return;
+        if (!AdsActive) return;
         // destroy old instance.
         DestroyAppOpenAd();
         isRequesting = true;
@@ -87,6 +87,7 @@ public class AppOpenAdManager
                 {
                     Debug.LogError("app open ad failed to load an ad " +
                                     "with error : " + error);
+                    EventDispatcher.Instance.PostEvent(EventID.OnChangeSateLoadAOA, false);
                     return;
                 }
 
@@ -95,6 +96,7 @@ public class AppOpenAdManager
 
                 _appOpenAd = ad;
                 RegisterEventHandlers(_appOpenAd);
+                EventDispatcher.Instance.PostEvent(EventID.OnChangeSateLoadAOA, true);
             });
     }
 
@@ -106,12 +108,12 @@ public class AppOpenAdManager
             Debug.Log(String.Format("App open ad paid {0} {1}.",
                 adValue.Value,
                 adValue.CurrencyCode));
-        double valueMicros = adValue.Value / 1000000f;
-        string currencyCode = adValue.CurrencyCode;
-        ResponseInfo responseInfo = _appOpenAd.GetResponseInfo();
-        AdapterResponseInfo loadedAdapterResponseInfo = responseInfo.GetLoadedAdapterResponseInfo();
-        string adSourceId = loadedAdapterResponseInfo.AdSourceId;
-        string adSourceName = loadedAdapterResponseInfo.AdSourceName;
+            double valueMicros = adValue.Value / 1000000f;
+            string currencyCode = adValue.CurrencyCode;
+            ResponseInfo responseInfo = _appOpenAd.GetResponseInfo();
+            AdapterResponseInfo loadedAdapterResponseInfo = responseInfo.GetLoadedAdapterResponseInfo();
+            string adSourceId = loadedAdapterResponseInfo.AdSourceId;
+            string adSourceName = loadedAdapterResponseInfo.AdSourceName;
 #if USE_FIREBASE_LOG_EVENT
         var impressionParameters = new[] {
             new Parameter ("ad_platform", "Admob"),
@@ -160,6 +162,7 @@ public class AppOpenAdManager
             Debug.Log("Closed app open ad");
             // Set the ad to null to indicate that AppOpenAdManager no longer has another ad to show.
             isShowingAd = false;
+            EventDispatcher.Instance.PostEvent(EventID.OnCloseAOA);
             LoadAOA();
         };
         // Raised when the ad failed to open full screen content.
@@ -183,7 +186,7 @@ public class AppOpenAdManager
             LoadAOA();
             return;
         }
-        
+
         Debug.Log("Showing AOA");
         _appOpenAd.Show();
     }
