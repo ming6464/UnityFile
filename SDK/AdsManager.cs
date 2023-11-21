@@ -1176,13 +1176,30 @@ public class AdsManager : MonoBehaviour
             new Firebase.Analytics.Parameter ("ad_platform", "AppLovin"),
             new Firebase.Analytics.Parameter ("ad_source", adInfo.NetworkName),
             new Firebase.Analytics.Parameter ("ad_unit_name", adInfo.AdUnitIdentifier),
-            new Firebase.Analytics.Parameter ("ad_format", adInfo.Placement),
+            new Firebase.Analytics.Parameter ("ad_format", adInfo.AdFormat),
             new Firebase.Analytics.Parameter ("value", adInfo.Revenue),
             new Firebase.Analytics.Parameter ("currency", "USD"), // All AppLovin revenue is sent in USD
-        }; ;
+        };
         FirebaseAnalytics.LogEvent("ad_impression", impressionParameters);
+        //FirebaseAnalytics.LogEvent("ad_impression_abi", impressionParameters);
     }
+    
+    public void TrackAdRevenueMREC(MaxSdkBase.AdInfo adInfo)
+    {
+        var impressionParameters = new[] {
+            new Firebase.Analytics.Parameter ("ad_platform", "AppLovin"),
+            new Firebase.Analytics.Parameter ("ad_source", adInfo.NetworkName),
+            new Firebase.Analytics.Parameter ("ad_unit_name", adInfo.AdUnitIdentifier),
+            new Firebase.Analytics.Parameter ("ad_format", "MREC"),
+            new Firebase.Analytics.Parameter ("value", adInfo.Revenue),
+            new Firebase.Analytics.Parameter ("currency", "USD"), // All AppLovin revenue is sent in USD
+        };
+        FirebaseAnalytics.LogEvent("ad_impression", impressionParameters);
+        //FirebaseAnalytics.LogEvent("ad_impression_abi", impressionParameters);
+    }
+    
 #endif
+
 
 #if USE_IRON_SOURCE
     /// <summary>
