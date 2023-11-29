@@ -9,8 +9,9 @@ using LocalNotification = UnityEngine.iOS.LocalNotification;
 using NotificationServices = UnityEngine.iOS.NotificationServices;
 #endif
 
-public class NotificationHelper_1 : MonoBehaviour
+public class NotificationHelper : MonoBehaviour
 {
+    static List<string> Handled_Ids = new List<string>();
     string _Channel_Id = "notify_daily_reminder";
     string _Icon_Small = "icon"; //this is setup under Project Settings -> Mobile Notifications
     string _Icon_Large = "logo"; //this is setup under Project Settings -> Mobile Notifications
@@ -18,7 +19,7 @@ public class NotificationHelper_1 : MonoBehaviour
     string _Channel_Description = "Conquer it all!";
     private int _IdChannelOffline;
     private bool checkInit;
-    
+
     //create new schedule
     string[] titles = {
         "BobaTea on Morning",
@@ -30,12 +31,12 @@ public class NotificationHelper_1 : MonoBehaviour
         "A delicious cup of milk tea for an enjoyable lunch",
         "Immerse yourself in the night with a gentle, loving cocktail"
     };
-    
+
     private void Awake()
     {
         PlayerPrefsSave.IsAcceptNotiAndroid13 = false;
     }
-    
+
     private void Start()
     {
         Debug.Log("minh_20231120 _ noti 1");
@@ -60,10 +61,10 @@ public class NotificationHelper_1 : MonoBehaviour
         }
         return;
 #endif
-        PlayerPrefsSave.IsAcceptNotiAndroid13 = true;  
+        PlayerPrefsSave.IsAcceptNotiAndroid13 = true;
         IntialNoti();
     }
-    
+
     void IntialNoti()
     {
         checkInit = true;
@@ -99,7 +100,7 @@ public class NotificationHelper_1 : MonoBehaviour
     }
     internal void Setup_Notifications()
     {
-        if(!checkInit) return;
+        if (!checkInit) return;
 #if UNITY_ANDROID
         //initialize the channel
         //add our channel
@@ -115,10 +116,10 @@ public class NotificationHelper_1 : MonoBehaviour
 #endif
         ScheduleNoti();
     }
-    
+
     void ScheduleNoti()
     {
-        if(!checkInit) return;
+        if (!checkInit) return;
         // Calculate delivery time for daily notification at 12:30PM
         DateTime currentDateTime = DateTime.Now;
 #if UNITY_ANDROID
@@ -163,9 +164,9 @@ public class NotificationHelper_1 : MonoBehaviour
         }
     }
 
-    private int ScheduleNotification(string title,string body,DateTime deliveryTime)
+    private int ScheduleNotification(string title, string body, DateTime deliveryTime)
     {
-        if(!checkInit) return -1;
+        if (!checkInit) return -1;
 #if UNITY_ANDROID
         try
         {
@@ -207,7 +208,7 @@ public class NotificationHelper_1 : MonoBehaviour
 
     private void OnApplicationPause(bool pauseStatus)
     {
-        if(!checkInit) return;
+        if (!checkInit) return;
 #if UNITY_ANDROID
         if (pauseStatus)
         {
@@ -251,12 +252,12 @@ public class NotificationHelper_1 : MonoBehaviour
 #endif        
     }
 
-#region IOS
+    #region IOS
 #if UNITY_IOS
 #endif
-#endregion
+    #endregion
 
-#region Android
+    #region Android
 #if UNITY_ANDROID
     private void PermissionPostNotificationDenied(string obj)
     {
@@ -282,5 +283,5 @@ public class NotificationHelper_1 : MonoBehaviour
         return 0;
     }
 #endif
-#endregion
+    #endregion
 }

@@ -8,6 +8,7 @@ using UnityEngine.Android;
 
 public class NotificationHelper : MonoBehaviour
 {
+    static List<string> Handled_Ids = new List<string>();
     string _Channel_Id = "notify_daily_reminder";
     string _Icon_Small = "icon"; //this is setup under Project Settings -> Mobile Notifications
     string _Icon_Large = "logo"; //this is setup under Project Settings -> Mobile Notifications
