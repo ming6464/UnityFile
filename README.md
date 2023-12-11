@@ -3,6 +3,9 @@
 # Những Package mất tiền hoặc không còn trên Asset Store
 - Link: https://drive.google.com/drive/folders/1F-Z4VoDONgBS98JK3mVVG_rQAdy_CjBw?usp=drive_link
 
+#Design Pattern
+https://github.com/QianMo/Unity-Design-Pattern
+
 #SDK UNITY
 - Link: https://drive.google.com/drive/folders/1KnDkGsy7mPvjeyTmTu4BxuNgr_jqNio8
 
