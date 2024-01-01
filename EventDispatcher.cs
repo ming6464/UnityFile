@@ -1,12 +1,13 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System;
 
 public class EventDispatcher : MonoBehaviour
 {
     #region Singleton
-    static EventDispatcher s_instance;
+
+    private static EventDispatcher s_instance;
+
     public static EventDispatcher Instance
     {
         get
@@ -15,14 +16,14 @@ public class EventDispatcher : MonoBehaviour
             if (s_instance == null)
             {
                 // create new Gameobject, and add EventDispatcher component
-                GameObject singletonObject = new GameObject();
+                var singletonObject = new GameObject();
                 s_instance = singletonObject.AddComponent<EventDispatcher>();
                 singletonObject.name = "Singleton - EventDispatcher";
                 //Common.Log("Create singleton : {0}", singletonObject.name);
             }
+
             return s_instance;
         }
-        private set { }
     }
 
     public static bool HasInstance()
@@ -30,10 +31,10 @@ public class EventDispatcher : MonoBehaviour
         return s_instance != null;
     }
 
-    void Awake()
+    private void Awake()
     {
         // check if there's another instance already exist in scene
-        if (s_instance != null && s_instance.GetInstanceID() != this.GetInstanceID())
+        if (s_instance != null && s_instance.GetInstanceID() != GetInstanceID())
         {
             // Destroy this instances because already exist the singleton of EventsDispatcer
             // Common.Log("An instance of EventDispatcher already exist : <{1}>, So destroy this instance : <{2}>!!", s_instance.name, name);
@@ -42,13 +43,13 @@ public class EventDispatcher : MonoBehaviour
         else
         {
             // set instance
-            s_instance = this as EventDispatcher;
+            s_instance = this;
             DontDestroyOnLoad(gameObject);
         }
     }
 
 
-    void OnDestroy()
+    private void OnDestroy()
     {
         ClearAllListener();
         //s_instance = null;
@@ -59,28 +60,22 @@ public class EventDispatcher : MonoBehaviour
         //    s_instance = null;
         //}
     }
+
     #endregion
 
 
     #region Fields
+
     /// Store all "listener"
-    Dictionary<EventID, Action<object>> _listeners = new Dictionary<EventID, Action<object>>();
+    private Dictionary<EventID, Action<object>> _listeners = new();
+
     #endregion
 
 
     #region Add Listeners, Post events, Remove listener
 
-    /// <summary>
-    /// Register to listen for eventID
-    /// </summary>
-    /// <param name="eventID">EventID that object want to listen</param>
-    /// <param name="callback">Callback will be invoked when this eventID be raised</para	m>
     public void RegisterListener(EventID eventID, Action<object> callback)
     {
-        // checking params
-        // Common.Assert(callback != null, "AddListener, event {0}, callback = null !!", eventID.ToString());
-        // Common.Assert(eventID != EventID.None, "RegisterListener, event = None !!");
-
         // check if listener exist in distionary
         if (_listeners.ContainsKey(eventID))
         {
@@ -95,34 +90,19 @@ public class EventDispatcher : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Posts the event. This will notify all listener that register for this event
-    /// </summary>
-    /// <param name="eventID">EventID.</param>
-    /// <param name="sender">Sender, in some case, the Listener will need to know who send this message.</param>
-    /// <param name="param">Parameter. Can be anything (struct, class ...), Listener will make a cast to get the data</param>
     public void PostEvent(EventID eventID, object param = null)
     {
         if (!_listeners.ContainsKey(eventID))
-        {
             //Common.Log("No listeners for this event : {0}", eventID);
             return;
-        }
-
-        Action<object> a = null;
-
         // posting event
         var callbacks = _listeners[eventID];
         // if there's no listener remain, then do nothing
         if (callbacks != null)
-        {
             callbacks(param);
-        }
         else
-        {
             //Common.Log("PostEvent {0}, but no listener remain, Remove this key", eventID);
             _listeners.Remove(eventID);
-        }
     }
 
     /// <summary>
@@ -138,12 +118,7 @@ public class EventDispatcher : MonoBehaviour
 
         if (_listeners.ContainsKey(eventID))
         {
-            try
-            {
-                _listeners[eventID] -= callback;
-            }
-            catch (Exception e)
-            { }
+            _listeners[eventID] -= callback;
         }
         else
         {
@@ -158,11 +133,13 @@ public class EventDispatcher : MonoBehaviour
     {
         _listeners.Clear();
     }
+
     #endregion
 }
 
 
 #region Extension class
+
 /// <summary>
 /// Delare some "shortcut" for using EventDispatcher easier
 /// </summary>
@@ -186,6 +163,7 @@ public static class EventDispatcherExtension
         EventDispatcher.Instance.PostEvent(eventID, null);
     }
 }
+
 #endregion
 
 #region eventID
@@ -194,39 +172,17 @@ public static class EventDispatcherExtension
 public enum EventID
 {
     None = 0,
-    OnGameStageChange,
-    StartFight,
-    OnCharDie,
-    OnShowNewChar,
-    OnPreWin,
-    OnWin,
-    OnPreFail,
-    OnFail,
-    OnShowDialogSeting,
-    OnShowDialogCard,
-    OnSpawnCharSave,
-    OnReadyStartFight,
-    OnUpdateCoin,
-    OnCompliteLoad,
-    OnShowFx,
-    OnDragChar,
-    OnEndDragChar,
-    OnShowUIWaitAds,
-    OnShowFxCoin,
-    OnLoadConfigDataLevel,
-    OnRetryCheckInternet,
-    OnCheckBossReady,
-    OnShowAdsInterstitial,
-    OnSpawnChest,
-    OnHideUI,
-    OnShowUI,
-    OnShowUILoad,
-    OnShowUIChoseLevel,
-    OnHideUIChoseLevel,
-    OnChangeSateLoadAOA,
-    OnCloseAOA,
-    OnShowGDPR,
-    OnAcceptGDPR
+    OnPullTrigger,
+    OnReleaseTrigger,
+    OnChangeFireMode,
+    OnPickUpWeapon,
+    OnDropWeapon,
+    OnChangeWeapon,
+    OnUpdateNumberBulletWeapon,
+    ReloadBullet,
+    OnWeaponPickupAreaEnter,
+    OnWeaponPickupAreaExit,
+    OnUpdateWeaponPickup
 }
-#endregion
 
+#endregion
