@@ -1,127 +1,151 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class AudioManager : MonoBehaviour
 {
-    
     private static AudioManager ins;
-    public static AudioManager Ins
-    {
-        get => ins;
-    }
-    
-    [Serializable]
-    public struct AudioInfo
-    {
-        public AudioSource Audio;
-        public Sound[] Sounds;
-    }
+    public static AudioManager Instance => ins;
 
-    [SerializeField] private AudioInfo sfx;
-    [SerializeField] private AudioInfo music;
+    public AudioSource AudioMusic;
+    public AudioSource AudioSFX;
+    public Sound[] Sounds;
 
-    private bool activeSfx;
-    private bool activeMusic;
+    private bool m_activeSfx;
+    private bool m_activeMusic;
 
     private void Awake()
     {
-        
-        if (!ins) ins = this;
-
-        if (music.Audio != null)
+        if (!ins)
         {
-            this.music.Audio.loop = true;
-            if (music.Audio.enabled) activeMusic = true;
+            ins = this;
         }
-        if (sfx.Audio != null)
+
+        if (AudioMusic != null)
         {
-            this.sfx.Audio.loop = false;
-            this.sfx.Audio.playOnAwake = false;
-            if (sfx.Audio.enabled) activeSfx = true;
+            if (AudioMusic.enabled)
+            {
+                m_activeMusic = true;
+            }
+        }
+
+        if (AudioSFX != null)
+        {
+            if (AudioSFX.enabled)
+            {
+                m_activeSfx = true;
+            }
         }
     }
 
-    public void PlaySfx(string name = null)
+    public void PlaySfx(KeySound key)
     {
-        if(!activeSfx) return;
-        if(sfx.Audio == null) return;
-        if(sfx.Sounds == null || sfx.Sounds.Length == 0) return;
-        
-        Sound sound;
-        if (string.IsNullOrEmpty(name))
+        if (!m_activeSfx)
         {
-            sound = sfx.Sounds[0];
+            return;
         }
-        else
+
+        if (AudioSFX == null || Sounds.Length == 0)
         {
-            sound = Array.Find(sfx.Sounds, s => s.name == name);
+            return;
         }
-        if(sound == null) return;
-        
-        sfx.Audio.PlayOneShot(sound.clip);
+
+        Sound sound = Array.Find(Sounds, s => s.Key == key);
+        if (sound == null || sound.SoundClip.Length == 0)
+        {
+            return;
+        }
+
+        int index = Random.Range(0, sound.SoundClip.Length);
+        AudioSFX.PlayOneShot(sound.SoundClip[index], sound.Volume);
         Debug.Log("Play Sfx");
     }
-    
-    public void PlayMusic(string name = null)
-    {
-        if(!activeMusic) return;
-        if(music.Audio == null) return;
-        if(music.Sounds == null || music.Sounds.Length == 0) return;
-        
-        Sound sound;
-        if (string.IsNullOrEmpty(name))
-        {
-            //nếu name trống hoặc null thì sẽ lấy phần tử đầu tiên
-            sound = music.Sounds[0];
-        }
-        else
-        {
-            //tìm phần tử trùng với name
-            sound = Array.Find(music.Sounds, s => s.name == name);
-        }
-        if(sound == null) return;
 
-        music.Audio.clip = sound.clip;
-        music.Audio.Play();
+    public void PlayMusic(KeySound key)
+    {
+        if (!m_activeMusic)
+        {
+            return;
+        }
+
+        if (AudioMusic == null || Sounds.Length == 0)
+        {
+            return;
+        }
+
+        Sound sound = Array.Find(Sounds, s => s.Key == key);
+        if (sound == null || sound.SoundClip.Length == 0)
+        {
+            return;
+        }
+
+        int index = Random.Range(0, sound.SoundClip.Length);
+        AudioMusic.clip = sound.SoundClip[index];
+        AudioMusic.volume = sound.Volume;
+        AudioMusic.Play();
         Debug.Log("Play Music");
     }
 
     public void ActiveSfx()
     {
-        if(sfx.Audio == null) return;
-        sfx.Audio.enabled = true;
-        activeSfx = true;
+        if (AudioSFX == null)
+        {
+            return;
+        }
+
+        AudioSFX.enabled = true;
+        m_activeSfx = true;
     }
 
     public void DisableSfx()
     {
-        if(sfx.Audio == null) return;
-        sfx.Audio.enabled = false;
-        activeSfx = false;
+        if (AudioSFX == null)
+        {
+            return;
+        }
+
+        AudioSFX.enabled = false;
+        m_activeSfx = false;
     }
-    
+
     public void ActiveMusic()
     {
-        if(music.Audio == null) return;
-        music.Audio.enabled = true;
-        activeMusic = true;
+        if (AudioMusic == null)
+        {
+            return;
+        }
+
+        AudioMusic.enabled = true;
+        m_activeMusic = true;
     }
 
     public void DisableMusic()
     {
-        if(music.Audio == null) return;
-        music.Audio.enabled = false;
-        activeMusic = false;
+        if (AudioMusic == null)
+        {
+            return;
+        }
+
+        AudioMusic.enabled = false;
+        m_activeMusic = false;
     }
 }
 
 [Serializable]
 public class Sound
 {
-    public string name;
-    public AudioClip clip;
+    public KeySound Key;
+
+    [Range(0.0f, 1.0f)]
+    public float Volume;
+
+    public AudioClip[] SoundClip;
 }
 
-
+[Serializable]
+public enum KeySound
+{
+    WalkFootStepStone,
+    RunFootStepStone,
+    Landing
+}
