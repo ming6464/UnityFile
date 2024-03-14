@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 {
@@ -31,18 +29,10 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 
     public virtual void Awake()
     {
-        MakeSingleton(true);
-    }
-    public virtual void Start()
-    {
-        
-    }
-    public virtual void Update()
-    {
-        
+        MakeSingleton();
     }
 
-    public void MakeSingleton(bool destroyOnload)
+    public void MakeSingleton()
     {
         if (instance == null)
         {
