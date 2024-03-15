@@ -6,44 +6,44 @@ public class EventDispatcher : MonoBehaviour
 {
     #region Singleton
 
-    private static EventDispatcher s_instance;
+    private static EventDispatcher m_instance;
 
     public static EventDispatcher Instance
     {
         get
         {
             // instance not exist, then create new one
-            if (s_instance == null)
+            if (m_instance == null)
             {
                 // create new Gameobject, and add EventDispatcher component
                 var singletonObject = new GameObject();
-                s_instance = singletonObject.AddComponent<EventDispatcher>();
+                m_instance = singletonObject.AddComponent<EventDispatcher>();
                 singletonObject.name = "Singleton - EventDispatcher";
                 //Common.Log("Create singleton : {0}", singletonObject.name);
             }
 
-            return s_instance;
+            return m_instance;
         }
     }
 
     public static bool HasInstance()
     {
-        return s_instance != null;
+        return m_instance != null;
     }
 
     private void Awake()
     {
         // check if there's another instance already exist in scene
-        if (s_instance != null && s_instance.GetInstanceID() != GetInstanceID())
+        if (m_instance != null && m_instance.GetInstanceID() != GetInstanceID())
         {
             // Destroy this instances because already exist the singleton of EventsDispatcer
-            // Common.Log("An instance of EventDispatcher already exist : <{1}>, So destroy this instance : <{2}>!!", s_instance.name, name);
+            // Common.Log("An instance of EventDispatcher already exist : <{1}>, So destroy this instance : <{2}>!!", m_instance.name, name);
             Destroy(gameObject);
         }
         else
         {
             // set instance
-            s_instance = this;
+            m_instance = this;
             DontDestroyOnLoad(gameObject);
         }
     }
@@ -52,12 +52,12 @@ public class EventDispatcher : MonoBehaviour
     private void OnDestroy()
     {
         ClearAllListener();
-        //s_instance = null;
+        //m_instance = null;
         // reset this static var to null if it's the singleton instance
-        //if (s_instance == this)
+        //if (m_instance == this)
         //{
         //    ClearAllListener();
-        //    s_instance = null;
+        //    m_instance = null;
         //}
     }
 
@@ -131,10 +131,18 @@ public class EventDispatcher : MonoBehaviour
     /// </summary>
     public void ClearAllListener()
     {
-        _listeners.Clear();
+        _listeners = new();
     }
 
     #endregion
+
+#if UNITY_EDITOR
+    private void OnApplicationQuit()
+    {
+        ClearAllListener();
+    }
+#endif
+    
 }
 
 
@@ -172,17 +180,6 @@ public static class EventDispatcherExtension
 public enum EventID
 {
     None = 0,
-    OnPullTrigger,
-    OnReleaseTrigger,
-    OnChangeFireMode,
-    OnPickUpWeapon,
-    OnDropWeapon,
-    OnChangeWeapon,
-    OnUpdateNumberBulletWeapon,
-    ReloadBullet,
-    OnWeaponPickupAreaEnter,
-    OnWeaponPickupAreaExit,
-    OnUpdateWeaponPickup
 }
 
 #endregion

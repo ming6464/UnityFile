@@ -2,28 +2,28 @@
 
 public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 {
-    // private static instance
-    static T instance;
+    // private static m_instance
+    static T m_instance;
 
-    // public static instance used to refer to Singleton (e.g. MyClass.Instance)
+    // public static m_instance used to refer to Singleton (e.g. MyClass.Instance)
     public static T Instance
     {
         get
         {
-            // if no instance is found, find the first GameObject of type T
-            if (instance == null)
+            // if no m_instance is found, find the first GameObject of type T
+            if (m_instance == null)
             {
-                instance = GameObject.FindObjectOfType<T>();
+                m_instance = GameObject.FindObjectOfType<T>();
 
-                // if no instance exists in the Scene, create a new GameObject and add the Component T 
-                if (instance == null)
+                // if no m_instance exists in the Scene, create a new GameObject and add the Component T 
+                if (m_instance == null)
                 {
                     GameObject singleton = new GameObject(typeof(T).Name);
-                    instance = singleton.AddComponent<T>();
+                    m_instance = singleton.AddComponent<T>();
                 }
             }
-            // return the singleton instance
-            return instance;
+            // return the singleton m_instance
+            return m_instance;
         }
     }
 
@@ -34,9 +34,9 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 
     public void MakeSingleton()
     {
-        if (instance == null)
+        if (m_instance == null)
         {
-            instance = this as T;
+            m_instance = this as T;
         }
         else
         {

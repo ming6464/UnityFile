@@ -6,22 +6,34 @@ public class JsonHelper
 {
     public static string ToJson<T>(T obj)
     {
-        if (obj == null) return "";
+        if (obj == null)
+        {
+            return "";
+        }
+
         return JsonUtility.ToJson(obj);
     }
 
     public static string ToJson<T>(List<T> array)
     {
-        if (array.Count == 0) return null;
-        var wrapper = new Wrapper<T>();
+        if (array.Count == 0)
+        {
+            return null;
+        }
+
+        Wrapper<T> wrapper = new();
         wrapper.Items = array;
         return JsonUtility.ToJson(wrapper);
     }
 
     public static string ToJson<T>(T[] array)
     {
-        if (array == null) return null;
-        var wrapper = new Wrapper<T>();
+        if (array == null)
+        {
+            return null;
+        }
+
+        Wrapper<T> wrapper = new();
         wrapper.ArrItem = array;
         return JsonUtility.ToJson(wrapper);
     }
@@ -31,17 +43,26 @@ public class JsonHelper
         return JsonUtility.FromJson<T>(json);
     }
 
+
     public static List<T> FromJsonList<T>(string json)
     {
-        if (string.IsNullOrEmpty(json)) return new List<T>();
-        var wrapper = JsonUtility.FromJson<Wrapper<T>>(json);
+        if (string.IsNullOrEmpty(json))
+        {
+            return new List<T>();
+        }
+
+        Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(json);
         return wrapper.Items;
     }
 
     public static T[] FromJsonArray<T>(string json)
     {
-        if (string.IsNullOrEmpty(json)) return new T[0];
-        var wrapper = JsonUtility.FromJson<Wrapper<T>>(json);
+        if (string.IsNullOrEmpty(json))
+        {
+            return new T[0];
+        }
+
+        Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(json);
         return wrapper.ArrItem;
     }
 
@@ -60,13 +81,14 @@ public static class JsonHelperExtension
     {
         return JsonHelper.FromJson<T>(JsonHelper.ToJson(source));
     }
+
     public static List<T> CloneListViaJson<T>(List<T> source)
     {
         return JsonHelper.FromJsonList<T>(JsonHelper.ToJson(source));
     }
+
     public static T[] CloneArrayViaJson<T>(T[] source)
     {
         return JsonHelper.FromJsonArray<T>(JsonHelper.ToJson(source));
     }
-    
 }
