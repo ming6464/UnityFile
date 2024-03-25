@@ -67,7 +67,7 @@ public class EventDispatcher : MonoBehaviour
     #region Fields
 
     /// Store all "listener"
-    private Dictionary<EventID, Action<object>> _listeners = new();
+    private Dictionary<EventID, Action<object>> _listeners = new Dictionary<EventID, Action<object>>();
 
     #endregion
 
@@ -131,7 +131,7 @@ public class EventDispatcher : MonoBehaviour
     /// </summary>
     public void ClearAllListener()
     {
-        _listeners = new();
+        _listeners = new Dictionary<EventID, Action<object>>();
     }
 
     #endregion
