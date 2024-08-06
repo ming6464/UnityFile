@@ -46,6 +46,7 @@ Shader "Horus/SimpleLit"
                 float3 positionWS : TEXCOORD1;
                 float3 normalWS : TEXCOORD2;
                 float3 diffuse : TEXCOORD4;
+                float fogFactor : TEXCOORD5;
                 DECLARE_LIGHTMAP_OR_SH(lightmapUV, vertexSH, 3);
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
@@ -78,6 +79,7 @@ Shader "Horus/SimpleLit"
                 output.positionWS = vertexInput.positionWS;
                 output.normalWS = normalInput.normalWS;
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
+                output.fogFactor = ComputeFogFactor(vertexInput.positionCS.z);
                 
                 OUTPUT_LIGHTMAP_UV(input.lightMapUV, unity_LightmapST, output.lightmapUV);
                 OUTPUT_SH(output.normalWS, output.vertexSH);
@@ -104,7 +106,7 @@ Shader "Horus/SimpleLit"
                 half3 bakedGI = SAMPLE_GI(input.lightmapUV, input.vertexSH, input.normalWS);
                 
                 half3 color = (bakedGI + input.diffuse) * albedo.rgb;
-                
+                color = MixFog(color, input.fogFactor);
                 return half4(color, albedo.a);
             }
             ENDHLSL

@@ -6,11 +6,11 @@ Shader "Horus/Lit"
         _Color("Albedo", Color) = (1,1,1,1)
         _Smoothness("Smoothness", Range(0,1)) = 0.5
         _Metallic("Metallic", Range(0,1)) = 0.5
-        
+
         //Normal
-        [Normal] _NormalMap("Normal Map", 2D) = "bump" {}
-        _NormalScale("Normal Scale", Float) = 1.0
-        
+        _BumpScale("Normal Scale", Float) = 1.0
+        [Normal] _BumpMap("Normal Map", 2D) = "bump" {}
+
         //Emission
         [HDR] _EmissionColor("Emission", Color) = (0,0,0)
         _EmissionMap("Emission Map", 2D) = "white" {}
@@ -78,10 +78,9 @@ Shader "Horus/Lit"
             half _Smoothness;
             half _Metallic;
             half3 _EmissionColor;
-            half _Alpha;
             float _NormalScale;
             CBUFFER_END
-            
+
             Varyings vert(Attributes input)
             {
                 Varyings output = (Varyings)0;
@@ -91,16 +90,16 @@ Shader "Horus/Lit"
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
                 VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
-                VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS.xyz,input.tangentOS);
+                VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS.xyz, input.tangentOS);
                 float4 tangentWS = float4(normalInput.tangentWS, input.tangentOS.w);
-                
+
                 output.positionWS = vertexInput.positionWS;
                 output.viewDir = GetWorldSpaceViewDir(output.positionWS);
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
                 output.positionCS = vertexInput.positionCS;
                 output.fogFactor = ComputeFogFactor(vertexInput.positionCS.z);
-                output.tangentToWorld = float3x3(tangentWS.xyz,normalInput.bitangentWS,normalInput.normalWS);
-                
+                output.tangentToWorld = float3x3(tangentWS.xyz, normalInput.bitangentWS, normalInput.normalWS);
+
                 OUTPUT_LIGHTMAP_UV(input.lightMapUV, unity_LightmapST, output.lightmapUV);
                 OUTPUT_SH(output.normalWS.xyz, output.vertexSH);
 
@@ -117,7 +116,7 @@ Shader "Horus/Lit"
                 half3 emissionCol = SAMPLE_TEXTURE2D(_EmissionMap, sampler_EmissionMap, uv).rgb * _EmissionColor;
                 float3 normalTS = UnpackNormalScale(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv), _NormalScale);
                 float3 normalWS = TransformTangentToWorld(normalTS, input.tangentToWorld);
-                
+
                 InputData inputData = (InputData)0;
                 inputData.positionWS = input.positionWS;
                 inputData.normalWS = SafeNormalize(normalWS);
@@ -126,7 +125,7 @@ Shader "Horus/Lit"
                 inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
                 half4 finalCol = UniversalFragmentPBR(inputData, col.rgb, _Metallic, 0,
                                                       _Smoothness, 1,
-                                                      emissionCol, _Alpha);
+                                                      emissionCol, 1);
 
                 finalCol.rgb = MixFog(finalCol.rgb, input.fogFactor);
                 return finalCol;
@@ -134,4 +133,6 @@ Shader "Horus/Lit"
             ENDHLSL
         }
     }
+
+    Fallback "Universal Render Pipeline/Unlit"
 }
