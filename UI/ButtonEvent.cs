@@ -17,9 +17,7 @@ namespace ComponentUtilitys
             private UnityEvent _event;
             [ShowIf("_actionType", "Event Dispatcher","_buttonTypeWay","One Way")]
             [SerializeField]
-            private EventID _eventID;
-            [SerializeField]
-            private EventPostValue _eventValue;
+            private DispatcherEventInfo _eventInfo;
             //Two Way
             [ShowIf("_actionType", "Unity Event","_buttonTypeWay","Two Way")]
             [SerializeField]
@@ -29,35 +27,28 @@ namespace ComponentUtilitys
 
             [ShowIf("_actionType", "Event Dispatcher","_buttonTypeWay","Two Way")]
             [SerializeField]
-            private EventID _eventIDOn;
+            private DispatcherEventInfo _eventOnInfo;
             [SerializeField]
-            private EventPostValue _eventValueOn;
-            [SerializeField]
-            private EventID _eventIDOff;
-            [SerializeField]
-            private EventPostValue _eventValueOff;
+            private DispatcherEventInfo _eventOffInfo;
             [EndIf]
             //
             [EndTab]
             private void HandleEventDispatcher(bool state = false)
             {
-                var eventId   = _eventID;
-                var eventInfo = _eventValue;
                 if (_buttonTypeWay.Equals("Two Way"))
                 {
                     if (state)
                     {
-                        eventId   = _eventIDOn;
-                        eventInfo = _eventValueOn;
+                        _eventOnInfo.PostEvent();
                     }
                     else
                     {
-                        eventId   = _eventIDOff;
-                        eventInfo = _eventValueOff; 
+                        _eventOffInfo.PostEvent();
                     }
+                    return;
                 }
-                if(eventId == EventID.None) return;
-                EventDispatcher.Instance.PostEvent(eventId,eventInfo.GetValuePost());
+
+                _eventInfo.PostEvent();
                 
             }
         
@@ -105,8 +96,23 @@ namespace ComponentUtilitys
         
     }
 
+
     [Serializable]
-    public class EventPostValue
+    public struct DispatcherEventInfo
+    {
+        public EventID        eventID;
+        public EventPostValue eventValue;
+        
+        public bool PostEvent()
+        {
+            if (eventID == EventID.None) return false;
+            EventDispatcher.Instance.PostEvent(eventID,eventValue.GetValuePost());
+            return true;
+        }
+    }
+
+    [Serializable]
+    public struct EventPostValue
     {
         public PrimitiveDataType valuePostType;
         public int @int;

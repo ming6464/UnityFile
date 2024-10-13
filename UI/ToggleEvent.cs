@@ -18,27 +18,22 @@ namespace ComponentUtilitys
     
         [ShowIf("_actionType", "Event Dispatcher")]
         [SerializeField]
-        private EventID _eventIDOn;
+        private DispatcherEventInfo _eventOnInfo;
         [SerializeField]
-        private EventPostValue _eventValueOn;
-        [SerializeField]
-        private EventID _eventIDOff;
-        [SerializeField]
-        private EventPostValue _eventValueOff;
+        private DispatcherEventInfo _eventOffInfo;
         [EndIf]
         
         [EndTab]
         private void HandleEventDispatcher(bool state)
         {
-            var eventId   = _eventIDOff;
-            var eventInfo = _eventValueOff;
             if (state)
             {
-                eventId   = _eventIDOn;
-                eventInfo = _eventValueOn;
+                _eventOnInfo.PostEvent();
             }
-            if(eventId == EventID.None) return;
-            EventDispatcher.Instance.PostEvent(eventId,eventInfo.GetValuePost());
+            else
+            {
+                _eventOffInfo.PostEvent();
+            }
         }
     
         private void HandleEventUnity(bool state)
